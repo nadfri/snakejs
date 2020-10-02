@@ -3,10 +3,13 @@
 }
 
 body{
+    margin: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     background-color: #ededed;
+    width: 900px;
+    overflow: hidden;
 }
 
 canvas{

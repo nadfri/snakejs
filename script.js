@@ -6,7 +6,7 @@ const width   = 600;
 const height  = 600;
 canvas.width  = width;
 canvas.height = height;
-const blockSize = 15;
+const blockSize = 20;
 
 
 //--------------------Quadrillage----------------------------
@@ -33,7 +33,6 @@ for (let i = 1; i < width/blockSize; i++)
 }
 
 
-
 class Shape
 {
     constructor (posX,posY,l,h,radius,color)
@@ -55,7 +54,7 @@ class Shape
         ctx.shadowColor   = "#363636";
         
         ctx.beginPath();
-        ctx.arc(this.posX*blockSize,this.posY*blockSize,this.radius*blockSize,0, Math.PI*2);
+        ctx.arc(this.posX,this.posY,this.radius,0, Math.PI*2);
         ctx.fillStyle = this.color;
         ctx.fill();
         ctx.strokeStyle = "green";
@@ -65,7 +64,7 @@ class Shape
     drawRect()
     {
         ctx.beginPath();
-        ctx.rect(this.posX*blockSize,this.posY*blockSize,this.l*blockSize,this.h*blockSize);
+        ctx.rect(this.posX,this.posY,this.l,this.h);
         ctx.fillStyle = this.color;
         ctx.fill();
     }
@@ -74,34 +73,17 @@ class Shape
 const pomme = new Shape(1,1,0,0,1,"greenYellow");//x,y,**,**,radius,color
 
 const snake = [
-    new Shape(10,10,1,1,0,"gold"),
-    new Shape(11,10,1,1,0,"black"),
-    new Shape(12,10,1,1,0,"black"),
-    new Shape(13,10,1,1,0,"black"),
-    new Shape(14,10,1,1,0,"black"),
+    new Shape(50,50,blockSize,blockSize,0,"gold"),
+    new Shape(60,50,blockSize,blockSize,0,"black"),
+    new Shape(70,50,blockSize,blockSize,0,"black"),
+    new Shape(80,50,blockSize,blockSize,0,"black"),
+    new Shape(90,50,blockSize,blockSize,0,"black"),
 ];
 
 let stopAnimation = false;
-
-
-function snakeControl()
-{
-    //sur tout le document
-    const arrow = {
-        "ArrowRight": "right",
-        "ArrowLeft" : "left",
-        "ArrowUp"   : "up" ,
-        "ArrowDown" : "down",
-    }
-    onkeydown = (e) => {
-        if(e.key in arrow) direction = arrow[e.key];
-        if(e.key == " ") gamePause();
-    }
-}
-
-
 let animation = requestAnimationFrame(motion);
 let direction = "left";
+let oldDirection;
 
 
 function motion()
@@ -122,7 +104,7 @@ function motion()
 
 
     setTimeout(()=>{if(stopAnimation == false) 
-        animation = requestAnimationFrame(motion)},80);
+    animation = requestAnimationFrame(motion)},100);
 } 
 
 
@@ -140,32 +122,73 @@ function updateDirection(snake)
     if(direction == "left")
     {
         updatePosition(snake);
-        snake[0].posX-=1;
+        snake[0].posX-=blockSize;
     }
 
     else if(direction == "right")
     {
         updatePosition(snake);
-        snake[0].posX+=1;
+        snake[0].posX+=blockSize;
     }
 
     else if(direction == "up")
     {
         updatePosition(snake);
-        snake[0].posY-=1;
+        snake[0].posY-=blockSize;
     }
 
     else if(direction == "down")
     {
         updatePosition(snake);
-        snake[0].posY+=1;
+        snake[0].posY+=blockSize;
     }
 
-    for(let element of snake) 
-    {
-        if(element == snake[0]) element.color = "gold";
-        else element.color = "black";
-        element.drawRect();
+    for(let element of snake) element.drawRect();
+
+}
+
+
+function snakeControl()
+{
+    
+    const arrow = {
+        "ArrowRight": "right",
+        "ArrowLeft" : "left",
+        "ArrowUp"   : "up" ,
+        "ArrowDown" : "down",
+    }
+
+    const keyImgUp = {
+        "ArrowRight": "img/RightArrow.png",
+        "ArrowLeft" : "img/LeftArrow.png",
+        "ArrowUp"   : "img/UpArrow.png" ,
+        "ArrowDown" : "img/DownArrow.png",
+    }
+
+    const keyImgDown = {
+        "ArrowRight": "img/RightArrowDown.png",
+        "ArrowLeft" : "img/LeftArrowDown.png",
+        "ArrowUp"   : "img/UpArrowDown.png" ,
+        "ArrowDown" : "img/DownArrowDown.png",
+    }
+
+    //sur tout le document
+    onkeydown = (e) => {
+        if(e.key in arrow) 
+        {
+            oldDirection = direction;
+            direction = arrow[e.key];
+            document.getElementById(arrow[e.key]).src = keyImgDown[e.key];
+        }
+        if(e.key == "p") gamePause();
+    }
+
+    onkeyup = (e) => {
+        if(e.key in arrow) 
+        {
+            direction = arrow[e.key];
+            document.getElementById(arrow[e.key]).src = keyImgUp[e.key];
+        }
     }
 }
 
@@ -176,8 +199,9 @@ function gamePause()
     {
         stopAnimation = true;
         console. log('stopAnimation:', stopAnimation)
-
+        drawMessage("PAUSE");
         cancelAnimationFrame(animation); //Freeze Animation
+        keyP.src = "img/KeyPDown.png";
     }
  
     else 
@@ -185,5 +209,22 @@ function gamePause()
         stopAnimation = false;
         console.log('stopAnimation:', stopAnimation)
         requestAnimationFrame(motion);
+        keyP.src = "img/KeyP.png";
     }          
 }   
+
+function drawMessage(text)
+{
+    ctx.shadowBlur    = 10;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
+    ctx.shadowColor   = "#363636";
+    
+    ctx.fillStyle = "blue";
+    ctx.font = "70px orbitron";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText(text,width/2,height/2);
+    ctx.strokeStyle = "red";
+    ctx.strokeText(text,width/2,height/2);
+}
