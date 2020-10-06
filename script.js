@@ -1,36 +1,20 @@
+/******************Declaration of Global Variables**********************/
 "use strict";
-
 //Canvas
 const ctx = canvas.getContext("2d");
-const width   = 600;
+const width   = 700;
 const height  = 600;
 canvas.width  = width;
 canvas.height = height;
-const blockSize = 20;
+const block = 20;
 
-
-//--------------------Quadrillage----------------------------
-
-
-function quadrillage() {
-for (let i = 1; i < width/blockSize; i++) 
-    {
-        ctx.strokeStyle = "gray"; //couleur du quadrillage
-        ctx.shadowBlur    = 0;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-
-        ctx.beginPath();
-        ctx.moveTo(0, blockSize * i);
-        ctx.lineTo(width, blockSize * i);
-        ctx.stroke();
-
-        ctx.moveTo(blockSize * i, 0);
-        ctx.lineTo(blockSize * i, height);
-        ctx.stroke();
-        ctx.closePath();
-    }
-}
+/*******************initial Value**************************************/
+let animation;
+let stopAnimation = false;
+let direction     = "left";
+let oldDirection  = "horizontal";
+let collision     = false;
+let play = false;
 
 
 class Shape
@@ -49,8 +33,6 @@ class Shape
     drawCircle()
     {
         ctx.shadowBlur    = 5;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
         ctx.shadowColor   = "#363636";
         
         ctx.beginPath();
@@ -70,31 +52,36 @@ class Shape
     }
 }
 
-const pomme = new Shape(1,1,0,0,1,"greenYellow");//x,y,**,**,radius,color
+
+//****************Creation of Apple and The Snake */
+const pomme = new Shape(100-block/2,100-block/2,0,0,block/2,"greenYellow");//x,y,**,**,radius,color
 
 const snake = [
-    new Shape(50,50,blockSize,blockSize,0,"gold"),
-    new Shape(60,50,blockSize,blockSize,0,"black"),
-    new Shape(70,50,blockSize,blockSize,0,"black"),
-    new Shape(80,50,blockSize,blockSize,0,"black"),
-    new Shape(90,50,blockSize,blockSize,0,"black"),
+    new Shape(400,        300,block,block,0,"gold"), //x,y,largeur,hauteur,**,color
+    new Shape(400+block,  300,block,block,0,"black"),
+    new Shape(400+block*2,300,block,block,0,"black"),
+    new Shape(400+block*3,300,block,block,0,"black"),
+    new Shape(400+block*4,300,block,block,0,"black"),
+    new Shape(400+block*5,300,block,block,0,"black"),
+    new Shape(400+block*6,300,block,block,0,"black"),
 ];
 
-let stopAnimation = false;
-let animation = requestAnimationFrame(motion);
-let direction = "left";
-let oldDirection;
+quadrillage();
+pomme.drawCircle();
+updateDirection(snake);
+launchGame();
 
 
+/*******************Animation of the Game*************************************/
 function motion()
 {
-    ctx.clearRect(0, 0, width, height); //clear canvas
-    //quadrillage();
+    /*#1*/ctx.clearRect(0, 0, width, height); //clear canvas
+    quadrillage();
     pomme.drawCircle();
+    detectCollision(snake);
     snakeControl();
     updateDirection(snake);
-
-
+    
     output.innerHTML = `snake[0].posX=${snake[0].posX}, snake[0].posY=${snake[0].posY}
                         <br>
                         snake[1].posX=${snake[1].posX}, snake[1].posY=${snake[1].posY}
@@ -105,52 +92,55 @@ function motion()
 
     setTimeout(()=>{if(stopAnimation == false) 
     animation = requestAnimationFrame(motion)},100);
+    gameOver();
 } 
 
 
-function updatePosition(snake)
+//--------------------Quadrillage----------------------------
+function quadrillage() {
+    for (let i = 1; i < width/block; i++) 
+        {
+            ctx.strokeStyle = "gray"; //couleur du quadrillage
+            ctx.shadowBlur    = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+    
+            ctx.beginPath();
+            ctx.moveTo(0, block * i);
+            ctx.lineTo(width, block * i);
+            ctx.stroke();
+    
+            ctx.moveTo(block * i, 0);
+            ctx.lineTo(block * i, height);
+            ctx.stroke();
+            ctx.closePath();
+        }
+    }
+
+
+/***************Snake Direction****************************************/
+function updateDirection(snake)
 {
     for(let i=snake.length-1; i>0;i--)
     {
         snake[i].posX = snake[i-1].posX;
         snake[i].posY = snake[i-1].posY;
     }
-}
 
-function updateDirection(snake)
-{
-    if(direction == "left")
-    {
-        updatePosition(snake);
-        snake[0].posX-=blockSize;
-    }
+    if     (direction == "left")  snake[0].posX-=block;
+    else if(direction == "right") snake[0].posX+=block;
+    else if(direction == "up")    snake[0].posY-=block;
+    else if(direction == "down")  snake[0].posY+=block;
 
-    else if(direction == "right")
-    {
-        updatePosition(snake);
-        snake[0].posX+=blockSize;
-    }
+    if(collision) for(let element of snake) element.color= "red";
 
-    else if(direction == "up")
-    {
-        updatePosition(snake);
-        snake[0].posY-=blockSize;
-    }
-
-    else if(direction == "down")
-    {
-        updatePosition(snake);
-        snake[0].posY+=blockSize;
-    }
-
-    for(let element of snake) element.drawRect();
+    for(let element of snake) element.drawRect();//draw new snake position
 
 }
 
-
+/***************Snake Control****************************************/
 function snakeControl()
 {
-    
     const arrow = {
         "ArrowRight": "right",
         "ArrowLeft" : "left",
@@ -172,31 +162,37 @@ function snakeControl()
         "ArrowDown" : "img/DownArrowDown.png",
     }
 
+    const opposedKey = {
+        "ArrowRight": "horizontal",
+        "ArrowLeft" : "horizontal",
+        "ArrowUp"   : "vertical" ,
+        "ArrowDown" : "vertical",
+    }
+
     //sur tout le document
     onkeydown = (e) => {
         if(e.key in arrow) 
         {
-            oldDirection = direction;
-            direction = arrow[e.key];
+            if(opposedKey[e.key] != oldDirection) direction = arrow[e.key];
+
             document.getElementById(arrow[e.key]).src = keyImgDown[e.key];
+
+            oldDirection = opposedKey[e.key];
         }
         if(e.key == "p") gamePause();
-    }
+    };
 
     onkeyup = (e) => {
-        if(e.key in arrow) 
-        {
-            direction = arrow[e.key];
-            document.getElementById(arrow[e.key]).src = keyImgUp[e.key];
-        }
-    }
+        if(e.key in arrow) document.getElementById(arrow[e.key]).src = keyImgUp[e.key];
+    };
 }
 
-
+/*******************************Function PAUSE**********************/
 function gamePause()
 { 
-    if(stopAnimation == false)
+    if(stopAnimation == false && play == true)
     {
+        info.textContent = "***GAME IS PAUSED***";
         stopAnimation = true;
         console. log('stopAnimation:', stopAnimation)
         drawMessage("PAUSE");
@@ -204,15 +200,49 @@ function gamePause()
         keyP.src = "img/KeyPDown.png";
     }
  
-    else 
+    else if (stopAnimation == true && play == true)
     {
+        info.textContent = "";
         stopAnimation = false;
         console.log('stopAnimation:', stopAnimation)
         requestAnimationFrame(motion);
         keyP.src = "img/KeyP.png";
     }          
-}   
+}  
 
+
+/*******************************Function Collision and Game Over**********************/
+function detectCollision(snake)
+{
+    const tail = snake.slice(1);
+    let selfCollision;
+
+    for (let element of tail)
+        if(snake[0].posX == element.posX && snake[0].posY == element.posY )
+            selfCollision = true;
+
+
+    if(snake[0].posX < 0 || snake[0].posX >= width  ||
+       snake[0].posY < 0 || snake[0].posY >= height || selfCollision)
+        collision = true;
+}
+
+function gameOver()
+{
+    if(collision)
+    {
+        drawMessage("GAME OVER");
+        stopAnimation = true;
+        play = false;
+        cancelAnimationFrame(animation);
+        info.textContent = "Press Space Bar to play again";
+
+        document.onkeypress = (e) => {
+        if(e.key == " ") document.location.reload();};
+    }  
+}
+
+/*******************************Function Message in Canvas**********************/
 function drawMessage(text)
 {
     ctx.shadowBlur    = 10;
@@ -228,3 +258,19 @@ function drawMessage(text)
     ctx.strokeStyle = "red";
     ctx.strokeText(text,width/2,height/2);
 }
+
+/****************************Launch the Game***********************************/
+function launchGame()
+{
+    document.onkeypress = (e) =>
+    {
+        if(e.key == " " && play == false) //launch by press bar space
+        {
+            play = true;
+            info.textContent = "";
+            animation = requestAnimationFrame(motion);
+        }
+
+    };
+}
+
