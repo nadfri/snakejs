@@ -20,6 +20,7 @@ canvas{
     box-shadow: 13px 9px 4px -4px  #7a7a7a;
 }
 
+
 .divInfo{
     height: 22px;
     width: 700px;
@@ -35,9 +36,7 @@ canvas{
     background-color: wheat;
     -webkit-box-shadow: 13px 9px 4px -4px #7a7a7a;
     -moz-box-shadow: 13px 9px 4px -4px  #7a7a7a;
-    box-shadow: 13px 9px 4px -4px  #7a7a7a;
-
-    
+    box-shadow: 13px 9px 4px -4px  #7a7a7a;   
 }
 
 .blink{

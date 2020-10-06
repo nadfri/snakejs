@@ -14,29 +14,25 @@ let stopAnimation = false;
 let direction     = "left";
 let oldDirection  = "horizontal";
 let collision     = false;
-let play = false;
+let play          = false;
 
 
 class Shape
 {
-    constructor (posX,posY,l,h,radius,color)
+    constructor (posX,posY,color)
     {
         this.posX   = posX;		
         this.posY   = posY;
-        this.l      = l;
-        this.h      = h;
-        this.radius = radius;
         this.color  = color;
-        this.stroke = "#282828";
     }
 
     drawCircle()
     {
-        ctx.shadowBlur    = 5;
+        ctx.shadowBlur    = 5; //shadow activé sur tous les dessins
         ctx.shadowColor   = "#363636";
-        
+
         ctx.beginPath();
-        ctx.arc(this.posX,this.posY,this.radius,0, Math.PI*2);
+        ctx.arc(this.posX*block+block/2,this.posY*block+block/2,block/2,0, Math.PI*2);
         ctx.fillStyle = this.color;
         ctx.fill();
         ctx.strokeStyle = "green";
@@ -46,7 +42,7 @@ class Shape
     drawRect()
     {
         ctx.beginPath();
-        ctx.rect(this.posX,this.posY,this.l,this.h);
+        ctx.rect(this.posX*block,this.posY*block,block,block);
         ctx.fillStyle = this.color;
         ctx.fill();
     }
@@ -54,17 +50,17 @@ class Shape
 
 
 //****************Creation of Apple and The Snake */
-const pomme = new Shape(100-block/2,100-block/2,0,0,block/2,"greenYellow");//x,y,**,**,radius,color
+const randomize = (max) => Math.floor(Math.random()*(max/block));
+const pomme = new Shape(randomize(width),randomize(height),"greenYellow");
 
 const snake = [
-    new Shape(400,        300,block,block,0,"gold"), //x,y,largeur,hauteur,**,color
-    new Shape(400+block,  300,block,block,0,"black"),
-    new Shape(400+block*2,300,block,block,0,"black"),
-    new Shape(400+block*3,300,block,block,0,"black"),
-    new Shape(400+block*4,300,block,block,0,"black"),
-    new Shape(400+block*5,300,block,block,0,"black"),
-    new Shape(400+block*6,300,block,block,0,"black"),
+    new Shape(10,10,"gold"),
+    new Shape(11,10,"black"),
+    new Shape(12,10,"black"),
 ];
+
+
+/*******************Launch The Game****************************************** */
 
 quadrillage();
 pomme.drawCircle();
@@ -80,21 +76,23 @@ function motion()
     pomme.drawCircle();
     detectCollision(snake);
     snakeControl();
+    eat(snake,pomme);
     updateDirection(snake);
+
     
     output.innerHTML = `snake[0].posX=${snake[0].posX}, snake[0].posY=${snake[0].posY}
                         <br>
                         snake[1].posX=${snake[1].posX}, snake[1].posY=${snake[1].posY}
                         <br>
                         snake[2].posX=${snake[2].posX}, snake[2].posY=${snake[2].posY}
+                        <br>
+                        pomme.posX=${pomme.posX}, pomme.posY=${pomme.posY}
                         `;
-
 
     setTimeout(()=>{if(stopAnimation == false) 
     animation = requestAnimationFrame(motion)},100);
     gameOver();
 } 
-
 
 //--------------------Quadrillage----------------------------
 function quadrillage() {
@@ -116,27 +114,6 @@ function quadrillage() {
             ctx.closePath();
         }
     }
-
-
-/***************Snake Direction****************************************/
-function updateDirection(snake)
-{
-    for(let i=snake.length-1; i>0;i--)
-    {
-        snake[i].posX = snake[i-1].posX;
-        snake[i].posY = snake[i-1].posY;
-    }
-
-    if     (direction == "left")  snake[0].posX-=block;
-    else if(direction == "right") snake[0].posX+=block;
-    else if(direction == "up")    snake[0].posY-=block;
-    else if(direction == "down")  snake[0].posY+=block;
-
-    if(collision) for(let element of snake) element.color= "red";
-
-    for(let element of snake) element.drawRect();//draw new snake position
-
-}
 
 /***************Snake Control****************************************/
 function snakeControl()
@@ -186,30 +163,37 @@ function snakeControl()
         if(e.key in arrow) document.getElementById(arrow[e.key]).src = keyImgUp[e.key];
     };
 }
-
-/*******************************Function PAUSE**********************/
-function gamePause()
-{ 
-    if(stopAnimation == false && play == true)
+/***************Snake Direction****************************************/
+function updateDirection(snake)
+{
+    for(let i=snake.length-1; i>0;i--)
     {
-        info.textContent = "***GAME IS PAUSED***";
-        stopAnimation = true;
-        console. log('stopAnimation:', stopAnimation)
-        drawMessage("PAUSE");
-        cancelAnimationFrame(animation); //Freeze Animation
-        keyP.src = "img/KeyPDown.png";
+        snake[i].posX = snake[i-1].posX;
+        snake[i].posY = snake[i-1].posY;
     }
- 
-    else if (stopAnimation == true && play == true)
-    {
-        info.textContent = "";
-        stopAnimation = false;
-        console.log('stopAnimation:', stopAnimation)
-        requestAnimationFrame(motion);
-        keyP.src = "img/KeyP.png";
-    }          
-}  
 
+    if     (direction == "left")  snake[0].posX-=1;
+    else if(direction == "right") snake[0].posX+=1;
+    else if(direction == "up")    snake[0].posY-=1;
+    else if(direction == "down")  snake[0].posY+=1;
+
+    if(collision) for(let element of snake) element.color= "red";
+
+    for(let element of snake) element.drawRect();//draw new snake position
+
+}
+
+/***************Snake eats apple****************************************/
+function eat(snake,pomme)
+{
+    if(snake[0].posX == pomme.posX && snake[0].posY == pomme.posY)
+    {
+        snake.push(new Shape(null,null,"greenYellow"));
+        setTimeout(()=>snake[snake.length-1].color = "black",500);
+        pomme.posX = randomize(width);
+        pomme.posY = randomize(height);
+    }
+}
 
 /*******************************Function Collision and Game Over**********************/
 function detectCollision(snake)
@@ -222,8 +206,8 @@ function detectCollision(snake)
             selfCollision = true;
 
 
-    if(snake[0].posX < 0 || snake[0].posX >= width  ||
-       snake[0].posY < 0 || snake[0].posY >= height || selfCollision)
+    if(snake[0].posX < 0 || snake[0].posX >= width/block  ||
+       snake[0].posY < 0 || snake[0].posY >= height/block || selfCollision)
         collision = true;
 }
 
@@ -262,7 +246,7 @@ function drawMessage(text)
 /****************************Launch the Game***********************************/
 function launchGame()
 {
-    document.onkeypress = (e) =>
+    onkeypress = (e) =>
     {
         if(e.key == " " && play == false) //launch by press bar space
         {
@@ -274,3 +258,25 @@ function launchGame()
     };
 }
 
+/*******************************Function PAUSE**********************/
+function gamePause()
+{ 
+    if(stopAnimation == false && play == true)
+    {
+        info.textContent = "***GAME IS PAUSED***";
+        stopAnimation = true;
+        console. log('stopAnimation:', stopAnimation)
+        drawMessage("PAUSE");
+        cancelAnimationFrame(animation); //Freeze Animation
+        keyP.src = "img/KeyPDown.png";
+    }
+ 
+    else if (stopAnimation == true && play == true)
+    {
+        info.textContent = "";
+        stopAnimation = false;
+        console.log('stopAnimation:', stopAnimation)
+        requestAnimationFrame(motion);
+        keyP.src = "img/KeyP.png";
+    }          
+} 
