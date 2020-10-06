@@ -1,6 +1,5 @@
-/******************Declaration of Global Variables**********************/
 "use strict";
-//Canvas
+/*********************CANVAS********************************************/
 const ctx = canvas.getContext("2d");
 const width   = 700;
 const height  = 600;
@@ -9,14 +8,24 @@ canvas.height = height;
 const block = 20;
 
 /*******************initial Value**************************************/
-let animation;
-let stopAnimation = false;
 let direction     = "left";
 let oldDirection  = "horizontal";
+let stopAnimation = false;
 let collision     = false;
-let play          = false;
+let score         = 0;
+let animation;
 
 
+/******************************AUDIOS***********************************/
+let play       = false;
+let music      = new Audio("music/mix.mp3");
+let glup       = new Audio("music/glup.mp3"); 
+let lost       = new Audio("music/lost.mp3") 
+const tabAudio = [music,glup,lost];
+let soundActive;
+speakerControl();
+
+/**************************CLASS***************************************/
 class Shape
 {
     constructor (posX,posY,color)
@@ -46,48 +55,31 @@ class Shape
         ctx.fillStyle = this.color;
         ctx.fill();
     }
+    
 }
 
-
-//****************Creation of Apple and The Snake */
+/****************Creation of Apple and The Snake *****************************/
 const randomize = (max) => Math.floor(Math.random()*(max/block));
 const pomme = new Shape(randomize(width),randomize(height),"greenYellow");
+const snake = [new Shape(20,15,"gold"),new Shape(21,15,"black"),new Shape(22,15,"black"),];
 
-const snake = [
-    new Shape(10,10,"gold"),
-    new Shape(11,10,"black"),
-    new Shape(12,10,"black"),
-];
-
-
-/*******************Launch The Game****************************************** */
-
+/*******************Launch The Game********************************************/
 quadrillage();
 pomme.drawCircle();
 updateDirection(snake);
 launchGame();
 
-
 /*******************Animation of the Game*************************************/
 function motion()
 {
-    /*#1*/ctx.clearRect(0, 0, width, height); //clear canvas
+    ctx.clearRect(0, 0, width, height); //clear canvas
     quadrillage();
     pomme.drawCircle();
     detectCollision(snake);
     snakeControl();
     eat(snake,pomme);
     updateDirection(snake);
-
-    
-    output.innerHTML = `snake[0].posX=${snake[0].posX}, snake[0].posY=${snake[0].posY}
-                        <br>
-                        snake[1].posX=${snake[1].posX}, snake[1].posY=${snake[1].posY}
-                        <br>
-                        snake[2].posX=${snake[2].posX}, snake[2].posY=${snake[2].posY}
-                        <br>
-                        pomme.posX=${pomme.posX}, pomme.posY=${pomme.posY}
-                        `;
+    scoreDisplay(score);
 
     setTimeout(()=>{if(stopAnimation == false) 
     animation = requestAnimationFrame(motion)},100);
@@ -188,6 +180,8 @@ function eat(snake,pomme)
 {
     if(snake[0].posX == pomme.posX && snake[0].posY == pomme.posY)
     {
+        scoreID.textContent = `Highscore: ${score++}`;
+        glup.play();
         snake.push(new Shape(null,null,"greenYellow"));
         setTimeout(()=>snake[snake.length-1].color = "black",500);
         pomme.posX = randomize(width);
@@ -220,6 +214,8 @@ function gameOver()
         play = false;
         cancelAnimationFrame(animation);
         info.textContent = "Press Space Bar to play again";
+        music.pause();
+        lost.play();
 
         document.onkeypress = (e) => {
         if(e.key == " ") document.location.reload();};
@@ -253,8 +249,8 @@ function launchGame()
             play = true;
             info.textContent = "";
             animation = requestAnimationFrame(motion);
+            music.play();
         }
-
     };
 }
 
@@ -269,14 +265,67 @@ function gamePause()
         drawMessage("PAUSE");
         cancelAnimationFrame(animation); //Freeze Animation
         keyP.src = "img/KeyPDown.png";
+        music.pause();
     }
  
     else if (stopAnimation == true && play == true)
     {
         info.textContent = "";
         stopAnimation = false;
-        console.log('stopAnimation:', stopAnimation)
         requestAnimationFrame(motion);
         keyP.src = "img/KeyP.png";
+        music.play();
     }          
 } 
+
+
+/*****************************Sound Control****************************/
+function mute()
+{
+    if(soundActive == 1)
+    {
+        soundActive = 0;
+        speaker.textContent = "🔈";
+        for (let audio of tabAudio) audio.muted = true;
+    }
+
+    else
+    {
+        soundActive = 1;
+        speaker.textContent = "🔊";
+        for (let audio of tabAudio) audio.muted = false;
+    }
+
+    localStorage.setItem("saveMute", soundActive); //save data sound
+}
+
+function speakerControl()
+{
+    speaker.onclick = mute;
+
+    let getStorage  = localStorage.getItem('saveMute'); //verify if data in storage
+    soundActive = (getStorage != null)? getStorage : 1;
+
+    if(soundActive == 0)
+    {
+        soundActive = 1;
+        mute();
+    }
+}
+
+
+/***************Score Display*********************************************/
+function scoreDisplay(score)
+{
+    ctx.shadowBlur    = 2;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.shadowColor   = "#363636";
+    
+    ctx.fillStyle = "indianred";
+    ctx.font = "18px orbitron";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText(`Score: ${score}`,width-130,4);
+
+}

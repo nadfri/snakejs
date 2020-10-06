@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Frijole&display=swap');
+
 
 body{
     margin: auto;
@@ -8,6 +10,30 @@ body{
     max-width: 900px;
     overflow: hidden;
 }
+
+h1{ 
+    font-family: 'Frijole', cursive;
+    font-size: 60px;
+    color: rgb(141, 62, 62);
+    margin:0;
+    padding: 0;
+    -webkit-text-box-shadow: 13px 9px 4px #7a7a7a;
+    -moz-text-box-shadow: 13px 9px 4px #7a7a7a;
+    text-shadow: 13px 9px 4px #7a7a7a;
+}
+
+.center{
+    display: flex;
+    align-items: center;
+}
+
+.logo{
+    width: 60px;
+    height: 60px;
+    padding-left: 20px;
+}
+
+
 
 canvas{
     background-color: wheat;
@@ -24,10 +50,10 @@ canvas{
 .divInfo{
     height: 22px;
     width: 700px;
-    margin: auto;
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 10px;
     border: solid 1px;
-    text-align: center;
     font-family: orbitron;
     border: ridge;
     border-color: indianred;
@@ -47,9 +73,16 @@ canvas{
     0%{opacity: 0;}
     50%{opacity: .5;}
     100%{opacity: 1;}
-    }
+}
+
+#info{
+    padding-left: 100px;
+}
 
 .speaker{
-  float: left;
   cursor: pointer;
+}
+
+.score{
+    padding-right: 5px;
 }
