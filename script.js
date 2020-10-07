@@ -1,19 +1,20 @@
 "use strict";
 /*********************CANVAS********************************************/
-const ctx = canvas.getContext("2d");
+const ctx     = canvas.getContext("2d");
 const width   = 700;
 const height  = 600;
 canvas.width  = width;
 canvas.height = height;
-const block = 20;
+const block   = 20;
 
 /*******************initial Value**************************************/
 let direction       = "left";
-let oldDirection    = "horizontal";
+let oldDirection    = "right";
 let stopAnimation   = false;
 let collision       = false;
 let score           = 0;
-let highScore       = (localStorage.getItem("highScore"))? localStorage.getItem("highScore") : "000";
+let speed           = 100;
+let highScore       = localStorage.getItem("highScore") || "000";
 scoreID.textContent = highScore;
 let animation;
 
@@ -26,8 +27,7 @@ let glup       = new Audio("music/glup.mp3");
 let lost       = new Audio("music/lost.mp3");
 let newRecord  = new Audio("music/newRecord.mp3"); 
 const tabAudio = [music,glup,lost,newRecord];
-let soundActive;
-speakerControl();
+mute(localStorage.getItem("sound"));
 
 /**************************CLASS***************************************/
 class Shape
@@ -68,24 +68,25 @@ const randomize = (max) => Math.floor(Math.random()*(max/block));
 const pomme = new Shape(randomize(width),randomize(height),"greenYellow");
 const snake = [new Shape(20,15,"gold"),new Shape(21,15,"black"),new Shape(22,15,"black"),];
 pomme.drawCircle(); //draw apple
-updateDirection(snake); //draw snake at new position
+newDirection(snake); //draw snake at new position
 
-/*******************Launch The Game********************************************/
+/**************************Run The Game********************************************/
+scoreDisplay(score);
 launchGame();
 
-/*******************Animation of the Game*************************************/
+/*************************Animation of the Game*************************************/
 function motion()
 {
     ctx.clearRect(0, 0, width, height); //clear canvas
     pomme.drawCircle();
-    detectCollision(snake);
     snakeControl();
+    newDirection(snake);
+    detectCollision(snake);
     eat(snake,pomme);
-    updateDirection(snake);
     scoreDisplay(score);
 
     setTimeout(()=>{if(stopAnimation == false) 
-    animation = requestAnimationFrame(motion)},90);
+    animation = requestAnimationFrame(motion)},speed);
     gameOver();
 } 
 
@@ -96,10 +97,12 @@ function launchGame()
     {
         if(e.key == " " && play == false) //launch by press bar space
         {
-            play = true;
+            play             = true;
             info.textContent = "";
-            animation = requestAnimationFrame(motion);
+            animation        = requestAnimationFrame(motion);
+            music.loop       = true;
             music.play();
+
         }
     };
 }
@@ -110,76 +113,66 @@ function gamePause()
     if(stopAnimation == false && play == true)
     {
         info.textContent = "***GAME IS PAUSED***";
-        stopAnimation = true;
-        console. log('stopAnimation:', stopAnimation)
+        stopAnimation    = true;
+        keyP.src         = "img/KeyPDown.png";
         drawMessage("PAUSE");
-        cancelAnimationFrame(animation); //Freeze Animation
-        keyP.src = "img/KeyPDown.png";
         music.pause();
+        cancelAnimationFrame(animation); //Freeze Animation
     }
  
     else if (stopAnimation == true && play == true)
     {
         info.textContent = "";
-        stopAnimation = false;
-        requestAnimationFrame(motion);
-        keyP.src = "img/KeyP.png";
+        stopAnimation    = false;
+        keyP.src         = "img/KeyP.png";
         music.play();
+        requestAnimationFrame(motion);
     }          
 } 
 
 /***************Snake Control****************************************/
 function snakeControl()
 {
-    const arrow = {
-        "ArrowRight": "right",
-        "ArrowLeft" : "left",
-        "ArrowUp"   : "up" ,
-        "ArrowDown" : "down",
-    }
+    onkeydown = (e) =>{
+        if(e.key == "p") gamePause();
 
-    const keyImgUp = {
-        "ArrowRight": "img/RightArrow.png",
-        "ArrowLeft" : "img/LeftArrow.png",
-        "ArrowUp"   : "img/UpArrow.png" ,
-        "ArrowDown" : "img/DownArrow.png",
-    }
-
-    const keyImgDown = {
-        "ArrowRight": "img/RightArrowDown.png",
-        "ArrowLeft" : "img/LeftArrowDown.png",
-        "ArrowUp"   : "img/UpArrowDown.png" ,
-        "ArrowDown" : "img/DownArrowDown.png",
-    }
-
-    const opposedKey = {
-        "ArrowRight": "horizontal",
-        "ArrowLeft" : "horizontal",
-        "ArrowUp"   : "vertical" ,
-        "ArrowDown" : "vertical",
-    }
-
-    //sur tout le document
-    onkeydown = (e) => {
-        if(e.key in arrow) 
+        if(e.key == "ArrowRight" && oldDirection != "left")
         {
-            if(opposedKey[e.key] != oldDirection) 
-            {
-                direction = arrow[e.key];
-                oldDirection = opposedKey[e.key];
-                document.getElementById(arrow[e.key]).src = keyImgDown[e.key];
-            } 
+            direction    = "right";
+            keyRight.src = "img/RightArrowDown.png";
         }
 
-        if(e.key == "p") gamePause();
+        else if(e.key == "ArrowLeft" && oldDirection != "right")
+        {
+            direction    = "left";
+            keyLeft.src = "img/LeftArrowDown.png";
+        }
+
+        else if(e.key == "ArrowDown" && oldDirection != "up")
+        {
+            direction = "down";
+            keyDown.src = "img/DownArrowDown.png";
+        }
+
+        else if(e.key == "ArrowUp" && oldDirection != "down")
+        {
+            direction = "up";
+            keyUp.src = "img/UpArrowDown.png";
+        }
+
+        oldDirection = direction;        
     };
 
-    onkeyup = (e) => {
-        if(e.key in arrow) document.getElementById(arrow[e.key]).src = keyImgUp[e.key];
+    onkeyup = (e) =>{
+        if(e.key == "ArrowRight") keyRight.src = "img/RightArrow.png";
+        if(e.key == "ArrowLeft")  keyLeft.src  = "img/LeftArrow.png";
+        if(e.key == "ArrowDown")  keyDown.src  = "img/DownArrow.png";
+        if(e.key == "ArrowUp")    keyUp.src    = "img/UpArrow.png";
     };
 }
+
 /***************Snake Direction****************************************/
-function updateDirection(snake)
+function newDirection(snake)
 {
     for(let i=snake.length-1; i>0;i--)
     {
@@ -189,12 +182,10 @@ function updateDirection(snake)
 
     if     (direction == "left")  snake[0].posX-=1;
     else if(direction == "right") snake[0].posX+=1;
-    else if(direction == "up")    snake[0].posY-=1;
+    else if(direction == "up")    snake[0].posY-=1; 
     else if(direction == "down")  snake[0].posY+=1;
 
-    if(collision) for(let element of snake) element.color= "red";
-
-    for(let element of snake) element.drawRect();//draw new snake position
+    for(let element of snake) element.drawRect();
 
 }
 
@@ -204,9 +195,12 @@ function eat(snake,pomme)
     if(snake[0].posX == pomme.posX && snake[0].posY == pomme.posY)
     {
         score++;
+        if(speed > 50) speed--;
+        music.playbackRate += 0.01;
+        console.log(speed);
         newHiScore(score);
         glup.play();
-        snake.push(new Shape(null,null,"gray"));
+        snake.push(new Shape(null,null,"#FFCEB8"));
         setTimeout(()=>snake[snake.length-1].color = "black",500);
         pomme.posX = randomize(width);
         pomme.posY = randomize(height);
@@ -223,7 +217,6 @@ function detectCollision(snake)
         if(snake[0].posX == element.posX && snake[0].posY == element.posY )
             selfCollision = true;
 
-
     if(snake[0].posX < 0 || snake[0].posX >= width/block  ||
        snake[0].posY < 0 || snake[0].posY >= height/block || selfCollision)
         collision = true;
@@ -233,6 +226,8 @@ function gameOver()
 {
     if(collision)
     {
+        for(let element of snake) {element.color= "red"; element.drawRect()};
+
         drawMessage("GAME OVER");
         stopAnimation = true;
         play = false;
@@ -263,40 +258,33 @@ function drawMessage(text)
     ctx.strokeText(text,width/2,height/2);
 }
 
+//CHANGE MUTE CONTROL
 /*****************************Sound Control****************************/
-function mute()
+function mute(sound)
 {
-    if(soundActive == 1)
+    if(sound == "off")
     {
-        soundActive = 0;
         speaker.textContent = "🔈";
         for (let audio of tabAudio) audio.muted = true;
+    }
+}
+
+speaker.onclick = () =>{
+    if(speaker.textContent == "🔊")
+    {
+        speaker.textContent = "🔈";
+        for (let audio of tabAudio) audio.muted = true;
+        localStorage.setItem("sound","off");
     }
 
     else
     {
-        soundActive = 1;
         speaker.textContent = "🔊";
         for (let audio of tabAudio) audio.muted = false;
-    }
-
-    localStorage.setItem("saveMute", soundActive); //save data sound
-}
-
-function speakerControl()
-{
-    speaker.onclick = mute;
-
-    let getStorage  = localStorage.getItem('saveMute'); //verify if data in storage
-    soundActive = (getStorage != null)? getStorage : 1;
-
-    if(soundActive == 0)
-    {
-        soundActive = 1;
-        mute();
+        localStorage.setItem("sound","on");
     }
 }
-
+ 
 /***************Score Display and HighScore*********************************************/
 function scoreDisplay(score)
 {
