@@ -1,8 +1,8 @@
 "use strict";
 /*********************CANVAS********************************************/
 const ctx     = canvas.getContext("2d");
-const width   = 700;
-const height  = 600;
+const width   = 760;
+const height  = 460;
 canvas.width  = width;
 canvas.height = height;
 const block   = 20;
@@ -17,6 +17,7 @@ let speed           = 100;
 let highScore       = localStorage.getItem("highScore") || "000";
 scoreID.textContent = highScore;
 let animation;
+let fired = false;
 
 
 /******************************AUDIOS***********************************/
@@ -103,6 +104,8 @@ function launchGame()
             music.loop       = true;
             music.play();
         }
+
+        return false; // to avoid scroll by space bar
     };
 }
 
@@ -133,33 +136,40 @@ function gamePause()
 function snakeControl()
 {
     onkeydown = (e) =>{
-        if(e.key == "p") gamePause();
 
-        if(e.key == "ArrowRight" && oldDirection != "left")
+        if(fired == false) //new move only if precedent move is over
         {
-            direction    = "right";
-            keyRight.src = "img/RightArrowDown.png";
-        }
+            if(e.key == "p") gamePause();
 
-        else if(e.key == "ArrowLeft" && oldDirection != "right")
-        {
-            direction    = "left";
-            keyLeft.src = "img/LeftArrowDown.png";
-        }
+            if(e.key == "ArrowRight" && oldDirection != "left")
+            {
+                direction    = "right";
+                keyRight.src = "img/RightArrowDown.png";
+            }
 
-        else if(e.key == "ArrowDown" && oldDirection != "up")
-        {
-            direction = "down";
-            keyDown.src = "img/DownArrowDown.png";
-        }
+            else if(e.key == "ArrowLeft" && oldDirection != "right")
+            {
+                direction    = "left";
+                keyLeft.src = "img/LeftArrowDown.png";
+            }
 
-        else if(e.key == "ArrowUp" && oldDirection != "down")
-        {
-            direction = "up";
-            keyUp.src = "img/UpArrowDown.png";
-        }
+            else if(e.key == "ArrowDown" && oldDirection != "up")
+            {
+                direction = "down";
+                keyDown.src = "img/DownArrowDown.png";
+            }
 
-        oldDirection = direction;
+            else if(e.key == "ArrowUp" && oldDirection != "down")
+            {
+                direction = "up";
+                keyUp.src = "img/UpArrowDown.png";
+            }
+
+            oldDirection = direction;
+            fired = true;
+
+            return false; // to avoid scroll
+        }
     };
 
     onkeyup = (e) =>{
@@ -184,7 +194,9 @@ function newDirection(snake)
     else if(direction == "up")    snake[0].posY-=1; 
     else if(direction == "down")  snake[0].posY+=1;
 
-    for(let element of snake) element.drawRect();
+    fired = false; //end of move
+
+    for(let element of snake) element.drawRect(); //draw snake
 }
 
 /***************Snake eats apple****************************************/
@@ -195,10 +207,10 @@ function eat(snake,pomme)
         score++;
         if(speed > 40) speed--;
         music.playbackRate += 0.01;
-        console.log(speed);
         newHiScore(score);
         glup.play();
         snake.push(new Shape(null,null,"#FFCEB8"));
+
         setTimeout(()=>snake[snake.length-1].color = "black",500);
         pomme.posX = randomize(width);
         pomme.posY = randomize(height);
@@ -292,7 +304,7 @@ function scoreDisplay(score)
     ctx.shadowColor   = "#363636";
     
     ctx.fillStyle = "#4B937B";
-    ctx.font = "18px orbitron";
+    ctx.font = "18px Orbitron";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     ctx.fillText(`Score: ${score}`,width-130,4);
