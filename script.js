@@ -166,12 +166,9 @@ function snakeControl()
             if(opposedKey[e.key] != oldDirection) 
             {
                 direction = arrow[e.key];
-                console.log('direction:', direction)
                 oldDirection = opposedKey[e.key];
                 document.getElementById(arrow[e.key]).src = keyImgDown[e.key];
-            }
-
-            
+            } 
         }
 
         if(e.key == "p") gamePause();
@@ -308,7 +305,7 @@ function scoreDisplay(score)
     ctx.shadowOffsetY = 2;
     ctx.shadowColor   = "#363636";
     
-    ctx.fillStyle = "indianred";
+    ctx.fillStyle = "#4B937B";
     ctx.font = "18px orbitron";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";

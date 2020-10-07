@@ -44,6 +44,10 @@ canvas{
     -webkit-box-shadow: 13px 9px 4px -4px #7a7a7a;
     -moz-box-shadow: 13px 9px 4px -4px  #7a7a7a;
     box-shadow: 13px 9px 4px -4px  #7a7a7a;
+    background-image: url(img/sand.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
 }
 
 
