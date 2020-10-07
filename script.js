@@ -122,7 +122,7 @@ function gamePause()
         cancelAnimationFrame(animation); //Freeze Animation
     }
  
-    else if (stopAnimation == true && play == true)
+    else if(stopAnimation == true && play == true)
     {
         info.textContent = "";
         stopAnimation    = false;
@@ -137,10 +137,10 @@ function snakeControl()
 {
     onkeydown = (e) =>{
 
+        if(e.key == "p") gamePause();
+
         if(fired == false) //new move only if precedent move is over
         {
-            if(e.key == "p") gamePause();
-
             if(e.key == "ArrowRight" && oldDirection != "left")
             {
                 direction    = "right";
@@ -168,7 +168,7 @@ function snakeControl()
             oldDirection = direction;
             fired = true;
 
-            return false; // to avoid scroll
+            e.preventDefault(); //avoid scroll by arrow
         }
     };
 
@@ -240,7 +240,6 @@ function gameOver()
 
         drawMessage("GAME OVER");
         stopAnimation = true;
-        play = false;
         cancelAnimationFrame(animation);
         info.textContent = "Press Space Bar to play again";
         music.pause();
@@ -248,6 +247,7 @@ function gameOver()
 
         document.onkeypress = (e) => {
         if(e.key == " ") document.location.reload();};
+
     }  
 }
 
@@ -257,14 +257,14 @@ function drawMessage(text)
     ctx.shadowBlur    = 10;
     ctx.shadowOffsetX = 5;
     ctx.shadowOffsetY = 5;
-    ctx.shadowColor   = "#363636";
+    ctx.shadowColor   = "black";
     
-    ctx.fillStyle = "blue";
-    ctx.font = "70px orbitron";
+    ctx.fillStyle = "orangered";
+    ctx.font = "70px Permanent Marker";
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.fillText(text,width/2,height/2);
-    ctx.strokeStyle = "red";
+    ctx.strokeStyle = "white";
     ctx.strokeText(text,width/2,height/2);
 }
 
