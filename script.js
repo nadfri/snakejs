@@ -9,7 +9,7 @@ const block   = 20;
 
 /*******************initial Value**************************************/
 let direction       = "left";
-let oldDirection    = "right";
+let oldDirection    = "left";
 let stopAnimation   = false;
 let collision       = false;
 let score           = 0;
@@ -68,7 +68,7 @@ const randomize = (max) => Math.floor(Math.random()*(max/block));
 const pomme = new Shape(randomize(width),randomize(height),"greenYellow");
 const snake = [new Shape(20,15,"gold"),new Shape(21,15,"black"),new Shape(22,15,"black"),];
 pomme.drawCircle(); //draw apple
-newDirection(snake); //draw snake at new position
+for(let element of snake) element.drawRect(); //draw snake
 
 /**************************Run The Game********************************************/
 scoreDisplay(score);
@@ -102,7 +102,6 @@ function launchGame()
             animation        = requestAnimationFrame(motion);
             music.loop       = true;
             music.play();
-
         }
     };
 }
@@ -160,7 +159,7 @@ function snakeControl()
             keyUp.src = "img/UpArrowDown.png";
         }
 
-        oldDirection = direction;        
+        oldDirection = direction;
     };
 
     onkeyup = (e) =>{
@@ -186,7 +185,6 @@ function newDirection(snake)
     else if(direction == "down")  snake[0].posY+=1;
 
     for(let element of snake) element.drawRect();
-
 }
 
 /***************Snake eats apple****************************************/
@@ -195,7 +193,7 @@ function eat(snake,pomme)
     if(snake[0].posX == pomme.posX && snake[0].posY == pomme.posY)
     {
         score++;
-        if(speed > 50) speed--;
+        if(speed > 40) speed--;
         music.playbackRate += 0.01;
         console.log(speed);
         newHiScore(score);
