@@ -103,3 +103,8 @@ canvas{
 .score{
     padding-right: 5px;
 }
+
+.loaderFace{
+    display: none;
+    font-family: 'Permanent Marker', cursive;
+}
