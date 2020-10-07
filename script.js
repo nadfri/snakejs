@@ -104,8 +104,6 @@ function launchGame()
             music.loop       = true;
             music.play();
         }
-
-        return false; // to avoid scroll by space bar
     };
 }
 
@@ -145,31 +143,35 @@ function snakeControl()
             {
                 direction    = "right";
                 keyRight.src = "img/RightArrowDown.png";
+                e.preventDefault();
             }
 
             else if(e.key == "ArrowLeft" && oldDirection != "right")
             {
                 direction    = "left";
                 keyLeft.src = "img/LeftArrowDown.png";
+                e.preventDefault();
             }
 
             else if(e.key == "ArrowDown" && oldDirection != "up")
             {
                 direction = "down";
                 keyDown.src = "img/DownArrowDown.png";
+                e.preventDefault();
             }
 
             else if(e.key == "ArrowUp" && oldDirection != "down")
             {
                 direction = "up";
                 keyUp.src = "img/UpArrowDown.png";
+                e.preventDefault();
             }
 
             oldDirection = direction;
             fired = true;
-
-            e.preventDefault(); //avoid scroll by arrow
         }
+
+        
     };
 
     onkeyup = (e) =>{
@@ -247,7 +249,6 @@ function gameOver()
 
         document.onkeypress = (e) => {
         if(e.key == " ") document.location.reload();};
-
     }  
 }
 
