@@ -170,8 +170,6 @@ function snakeControl()
             oldDirection = direction;
             fired = true;
         }
-
-        
     };
 
     onkeyup = (e) =>{
@@ -269,7 +267,6 @@ function drawMessage(text)
     ctx.strokeText(text,width/2,height/2);
 }
 
-//CHANGE MUTE CONTROL
 /*****************************Sound Control****************************/
 function mute(sound)
 {
@@ -305,7 +302,7 @@ function scoreDisplay(score)
     ctx.shadowColor   = "#363636";
     
     ctx.fillStyle = "#4B937B";
-    ctx.font = "18px Orbitron";
+    ctx.font = "bold 18px Orbitron";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     ctx.fillText(`Score: ${score}`,width-160,4);
