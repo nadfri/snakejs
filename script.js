@@ -12,17 +12,16 @@ let direction       = "left";
 let oldDirection    = "left";
 let stopAnimation   = false;
 let collision       = false;
+let fired           = false;
+let play            = false;
+let once            = true;
 let score           = 0;
 let speed           = 100;
 let highScore       = localStorage.getItem("highScore") || "000";
 scoreID.textContent = highScore;
 let animation;
-let fired = false;
-
 
 /******************************AUDIOS***********************************/
-let play       = false;
-let once       = true;
 let music      = new Audio("music/mix.mp3");
 let glup       = new Audio("music/glup.mp3"); 
 let lost       = new Audio("music/lost.mp3");
@@ -60,7 +59,6 @@ class Shape
         ctx.fillStyle = this.color;
         ctx.fill();
     }
-    
 }
 
 /****************Creation of Apple and The Snake *****************************/
@@ -68,6 +66,7 @@ const randomize = (max) => Math.floor(Math.random()*(max/block));
 
 const pomme = new Shape(randomize(width),randomize(height),"greenYellow");
 const snake = [new Shape(20,15,"gold"),new Shape(21,15,"black"),new Shape(22,15,"black"),];
+
 pomme.drawCircle(); //draw apple
 for(let element of snake) element.drawRect(); //draw snake
 
@@ -102,8 +101,9 @@ function launchGame()
             info.textContent = "";
             animation        = requestAnimationFrame(motion);
             music.loop       = true;
-            music.play();
+            music.play(); 
         }
+        e.preventDefault(); //prevent scroll bar
     };
 }
 
@@ -308,7 +308,7 @@ function scoreDisplay(score)
     ctx.font = "18px Orbitron";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    ctx.fillText(`Score: ${score}`,width-130,4);
+    ctx.fillText(`Score: ${score}`,width-160,4);
 }
 
 function newHiScore(score)
