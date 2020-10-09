@@ -205,7 +205,9 @@ function eat(snake,pomme)
     if(snake[0].posX == pomme.posX && snake[0].posY == pomme.posY)
     {
         score++;
-        if(speed > 40) speed--;
+        if(score % 3) speed--;
+        if(score == highScore && score > 5) pomme.color = "#FF9FE7";
+        else pomme.color = "greenYellow";
         music.playbackRate += 0.01;
         newHiScore(score);
         glup.play();
