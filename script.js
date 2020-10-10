@@ -134,36 +134,39 @@ function gamePause()
 function snakeControl()
 {
     onkeydown = (e) =>{
-
         if(e.key == "p") gamePause();
 
         if(fired == false) //new move only if precedent move is over
         {
-            if(e.key == "ArrowRight" && oldDirection != "left")
+            if((e.key == "ArrowRight" || e.key == "d") && oldDirection != "left")
             {
                 direction    = "right";
                 keyRight.src = "img/RightArrowDown.png";
+                keyD.src = "img/KeyDDown.png";
                 e.preventDefault();
             }
 
-            else if(e.key == "ArrowLeft" && oldDirection != "right")
+            else if((e.key == "ArrowLeft" || e.key == "q")  && oldDirection != "right")
             {
                 direction    = "left";
                 keyLeft.src = "img/LeftArrowDown.png";
+                keyQ.src = "img/KeyQDown.png";
                 e.preventDefault();
             }
 
-            else if(e.key == "ArrowDown" && oldDirection != "up")
+            else if((e.key == "ArrowDown" || e.key == "s") && oldDirection != "up")
             {
                 direction = "down";
                 keyDown.src = "img/DownArrowDown.png";
+                keyS.src = "img/KeySDown.png";
                 e.preventDefault();
             }
 
-            else if(e.key == "ArrowUp" && oldDirection != "down")
+            else if((e.key == "ArrowUp" || e.key == "z" ) && oldDirection != "down")
             {
                 direction = "up";
                 keyUp.src = "img/UpArrowDown.png";
+                keyZ.src = "img/KeyZDown.png";
                 e.preventDefault();
             }
 
@@ -173,10 +176,14 @@ function snakeControl()
     };
 
     onkeyup = (e) =>{
-        if(e.key == "ArrowRight") keyRight.src = "img/RightArrow.png";
-        if(e.key == "ArrowLeft")  keyLeft.src  = "img/LeftArrow.png";
-        if(e.key == "ArrowDown")  keyDown.src  = "img/DownArrow.png";
-        if(e.key == "ArrowUp")    keyUp.src    = "img/UpArrow.png";
+        if(e.key == "ArrowRight"|| e.key == "d") 
+            {keyRight.src = "img/RightArrow.png"; keyD.src = "img/KeyD.png";}
+        if(e.key == "ArrowLeft" || e.key == "q") 
+            {keyLeft.src  = "img/LeftArrow.png";  keyQ.src = "img/KeyQ.png";}
+        if(e.key == "ArrowDown" || e.key == "s")
+            {keyDown.src   = "img/DownArrow.png"; keyS.src = "img/KeyS.png";}
+        if(e.key == "ArrowUp"   || e.key == "z") 
+            {keyUp.src    = "img/UpArrow.png";    keyZ.src = "img/KeyZ.png";}
     };
 }
 
