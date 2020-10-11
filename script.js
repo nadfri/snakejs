@@ -62,9 +62,9 @@ class Shape
 }
 
 /****************Creation of Apple and The Snake *****************************/
-const randomize = (max) => Math.floor(Math.random()*(max/block));
+const randomize = (min,max) => Math.floor(Math.random()*(max/block-min))+min;
 
-const pomme = new Shape(randomize(width),randomize(height),"greenYellow");
+const pomme = new Shape(randomize(0,width),randomize(1,height-block),"greenYellow");
 const snake = [new Shape(20,15,"gold"),new Shape(21,15,"black"),new Shape(22,15,"black"),];
 
 pomme.drawCircle(); //draw apple
@@ -212,17 +212,30 @@ function eat(snake,pomme)
     if(snake[0].posX == pomme.posX && snake[0].posY == pomme.posY)
     {
         score++;
-        if(score % 3) speed--;
-        if(score == highScore && score > 5) pomme.color = "#FF9FE7";
-        else pomme.color = "greenYellow";
+        if(score % 5 == 0) 
+        {
+            speed--; 
+            console.log(speed)
+            pomme.color = "red";
+            info.textContent = "Speed Up!";
+            setTimeout(()=>info.textContent = "",5000);
+        }
+
+        else if(score == highScore && score > 5) pomme.color = "#FF9FE7";
+
+        else 
+        {
+            pomme.color = "greenYellow";
+        }
+
         music.playbackRate += 0.01;
         newHiScore(score);
         glup.play();
         snake.push(new Shape(null,null,"#FFCEB8"));
 
         setTimeout(()=>snake[snake.length-1].color = "black",500);
-        pomme.posX = randomize(width);
-        pomme.posY = randomize(height);
+        pomme.posX = randomize(1,width);
+        pomme.posY = randomize(1,height-block);
     }
 }
 
