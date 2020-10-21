@@ -17,7 +17,7 @@ let play            = false;
 let once            = true;
 let score           = 0;
 let speed           = 100;
-let highScore       = localStorage.getItem("highScore") || "000";
+let highScore       = localStorage.getItem("highScore") || "005";
 scoreID.textContent = highScore;
 let animation;
 
